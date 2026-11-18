@@ -29,6 +29,9 @@ test('furniture contact shadows render in the walk view with a rounded footprint
  assert.equal(contactShadowAlpha(0,.5),0,'fades to nothing at the quad edge');
  assert.ok(contactShadowAlpha(.15,.5)>contactShadowAlpha(.05,.5),'monotonic falloff');
  assert.ok(contactShadowAlpha(.2,.2)>0,'rectangular, not a disc');
+ const {createContactShadows}=await import('../src/contact-shadows.mjs');const owned=[],decal=createContactShadows(owned).mesh(2,1);
+ assert.equal(decal.userData.renderFixture,true,'editor/home decals must survive the walk-view filter');
+ owned.forEach(r=>r.dispose?.());
  const scene=readFileSync(new URL('../src/apartment-furniture-scene.js',import.meta.url),'utf8');
  assert.match(scene,/part:'furniture-contact-shadow',visualOnly:true,tourNonPhysical:true,renderFixture:true/);
 });
