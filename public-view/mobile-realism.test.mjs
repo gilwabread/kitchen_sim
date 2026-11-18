@@ -32,3 +32,24 @@ test('furniture contact shadows render in the walk view with a rounded footprint
  const scene=readFileSync(new URL('../src/apartment-furniture-scene.js',import.meta.url),'utf8');
  assert.match(scene,/part:'furniture-contact-shadow',visualOnly:true,tourNonPhysical:true,renderFixture:true/);
 });
+
+test('daylight uses PBR Neutral tone mapping on both backends so white walls stay white', ()=>{
+ const viewer=readFileSync(new URL('./DistrictViewer.jsx',import.meta.url),'utf8');
+ assert.match(viewer,/renderer\.toneMapping=THREE\.NeutralToneMapping/);
+ assert.doesNotMatch(viewer,/renderer\.toneMapping=THREE\.AgXToneMapping/);
+ assert.match(tone,/vec3 homeNeutralCurve\(/);
+ assert.match(effects,/tone\.neutral=mapping===NeutralToneMapping/);
+});
+
+test('legacy neutral-lighting preference is retired once; the new key is honoured', async ()=>{
+ const {readReferenceLighting,saveReferenceLighting,LEGACY_REFERENCE_LIGHTING_KEY}=await import('./reference-lighting.mjs');
+ const data=new Map([[LEGACY_REFERENCE_LIGHTING_KEY,'on']]),storage={getItem:k=>data.get(k),setItem:(k,v)=>data.set(k,v),removeItem:k=>data.delete(k)};
+ assert.equal(readReferenceLighting(storage),false);
+ assert.equal(data.has(LEGACY_REFERENCE_LIGHTING_KEY),false);
+ saveReferenceLighting(storage,true);assert.equal(readReferenceLighting(storage),true);
+});
+
+test('fabric and wood scans keep full resolution on phones', async ()=>{
+ const {MOBILE_FULL_RES_SCANS}=await import('./scanned-material-core.mjs');
+ assert.deepEqual([...MOBILE_FULL_RES_SCANS],['fabric','wood']);
+});
