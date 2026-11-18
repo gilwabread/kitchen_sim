@@ -64,3 +64,23 @@ test('alpha glass drops its milky white body and restores it for transmission', 
  setArchitecturalGlassQuality(glass,{});assert.equal(glass.color.getHexString(),'f6faf8');assert.equal(glass.transmission,.9);
  resources.forEach(r=>r.dispose());
 });
+
+test('legacy alpha panes lose the white body once; tinted or textured panes are untouched', async ()=>{
+ const T=await import('three');const {dimAlphaGlazing}=await import('../src/architectural-glass.mjs');
+ const pane=new T.MeshStandardMaterial({color:'#f6faf8',transparent:true,opacity:.08});
+ assert.equal(dimAlphaGlazing(pane),true);assert.equal(pane.color.getHexString(),'282a2a');assert.equal(pane.opacity,.08);
+ assert.equal(dimAlphaGlazing(pane),false);
+ const tinted=new T.MeshStandardMaterial({color:'#9fb4c0',transparent:true,opacity:.08});assert.equal(dimAlphaGlazing(tinted),false);
+ const solid=new T.MeshStandardMaterial({color:'#f6faf8'});assert.equal(dimAlphaGlazing(solid),false);
+});
+
+test('photo sky: lazy, daylight-only, sun-aligned', async ()=>{
+ const src=readFileSync(new URL('./photo-sky.mjs',import.meta.url),'utf8');
+ assert.match(src,/setTimeout\(/,'loaded lazily after the tour draws');
+ const {photoSkyStrength,photoSkyYaw,PHOTO_SKY_SUN_U}=await import('./photo-sky-math.mjs');
+ assert.equal(photoSkyStrength({dark:true,sun:{elevation:50}}),0);
+ assert.equal(photoSkyStrength({sun:{elevation:60}}),1);
+ assert.ok(photoSkyStrength({sun:{elevation:6}})>0&&photoSkyStrength({sun:{elevation:6}})<1);
+ const a=2*Math.PI*PHOTO_SKY_SUN_U,yaw=photoSkyYaw([1,0,0]),x=Math.cos(a),z=Math.sin(a);
+ assert.ok(Math.abs(x*Math.cos(yaw)+z*Math.sin(yaw)-1)<1e-9,'pano sun lands on the real sun azimuth');
+});

@@ -16,3 +16,8 @@ export function setArchitecturalGlassQuality(material,{mobile=false,tier=0,xr=fa
  if(material.transmission===transmission&&material.transparent===transparent&&material.opacity===opacity&&'#'+material.color.getHexString()===color)return false;
  material.transmission=transmission;material.transparent=transparent;material.opacity=opacity;material.color.set(color);material.needsUpdate=true;return true;
 }
+// Legacy door/window panes from the public baseline and building scene are
+// always alpha-blended #f6faf8 sheets (no transmission path); give them the same
+// near-black body once. Their opacity and reflections are unchanged.
+export const isAlphaGlazing=m=>!!m&&m.transparent&&!m.userData?.architecturalGlass&&!(m.transmission>0)&&!m.map&&m.opacity>0&&m.opacity<=.2&&m.color?.getHexString()==='f6faf8';
+export function dimAlphaGlazing(m){if(!isAlphaGlazing(m))return false;m.userData.glassColor='#f6faf8';m.userData.alphaGlazing=true;m.color.set(ALPHA_GLASS_COLOR);return true;}

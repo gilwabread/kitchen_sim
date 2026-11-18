@@ -1,6 +1,6 @@
 import {createArchitecturalNight} from '../src/architectural-night.mjs';
 import {AmbientLight,PointLight,DirectionalLight,HemisphereLight,SpotLight,Object3D} from 'three';
-import {setArchitecturalGlassQuality} from '../src/architectural-glass.mjs';
+import {setArchitecturalGlassQuality,dimAlphaGlazing} from '../src/architectural-glass.mjs';
 import {createInteriorProbe} from '../src/interior-probe.mjs';
 import {refreshShadowTarget,resizeShadowTarget} from '../src/shadow-target.mjs';
 import {RectAreaLight,Vector3} from 'three';
@@ -44,7 +44,7 @@ export function createInteriorLighting(scene,renderer,{mobile=false,environmentF
  bounce.name='tour-floor-bounce';walls.name='tour-wall-bounce';scene.add(bounce,walls,ceiling,target);
  let amount=0,exposure=.98,room=null,wanted=null,shadowAmount=0,disposed=false;
  return {
-  bind:root=>{night.bind(root);probe??=createInteriorProbe(renderer,{mobile,environmentFactory});probe.bind(root);root.traverse(o=>{for(const m of [o.material].flat().filter(Boolean))if(m.userData.architecturalGlass)glass.add(m);});updateGlass();},
+  bind:root=>{night.bind(root);probe??=createInteriorProbe(renderer,{mobile,environmentFactory});probe.bind(root);root.traverse(o=>{for(const m of [o.material].flat().filter(Boolean))if(m.userData.architecturalGlass)glass.add(m);else dimAlphaGlazing(m);});updateGlass();},
   update({inside=false,walking=false,solar,dt=.016,region=null,focus=null,xr=false,neutral=false}={}){
    if(disposed)return {amount:0,exposure,bounce:0,walls:0,shadow:0};
    if(lastXR!==xr){lastXR=xr;updateGlass();}
