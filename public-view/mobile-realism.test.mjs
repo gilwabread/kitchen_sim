@@ -56,3 +56,11 @@ test('fabric and wood scans keep full resolution on phones', async ()=>{
  const {MOBILE_FULL_RES_SCANS}=await import('./scanned-material-core.mjs');
  assert.deepEqual([...MOBILE_FULL_RES_SCANS],['fabric','wood']);
 });
+
+test('alpha glass drops its milky white body and restores it for transmission', async ()=>{
+ const {createArchitecturalGlass,setArchitecturalGlassQuality}=await import('../src/architectural-glass.mjs');
+ const resources=[],glass=createArchitecturalGlass(resources,{mobile:false});
+ setArchitecturalGlassQuality(glass,{mobile:true});assert.equal(glass.color.getHexString(),'282a2a');assert.equal(glass.opacity,.075);
+ setArchitecturalGlassQuality(glass,{});assert.equal(glass.color.getHexString(),'f6faf8');assert.equal(glass.transmission,.9);
+ resources.forEach(r=>r.dispose());
+});
